@@ -5,7 +5,12 @@ var app = express();
 var server = require('http').createServer(app);
 var morgan = require('morgan');
 var compression = require('compression');
+var bodyParser = require('body-parser');
 var io = require('socket.io')(server);
+var User = require('./models/user');
+var mongoose = require('mongoose');
+
+mongoose.connect('mongodb://' + process.env.DB_PORT_27017_TCP_ADDR + '/mean');
 
 app.enable('trust proxy');
 
@@ -17,9 +22,95 @@ app.set('view engine', 'jade');
 app.use(express.static(__dirname + '/public'));
 app.use(morgan('dev'));
 app.use(compression());
+app.use(bodyParser.json());
 
 app.get('/', function(req, res) {
   res.render('index');
+});
+
+app.get('/users/:id', function(req, res) {
+  User.findById(req.params.id, function(err, document) {
+    if (err) {
+      return res
+        .status(500)
+        .json(err);
+    }
+
+    if (!document) {
+      return res
+        .status(404)
+        .send();
+    }
+
+    res.json(document);
+  });
+});
+
+app.get('/users', function(req, res) {
+  User.find({}, function(err, documents) {
+    if (err) {
+      return res
+        .status(500)
+        .json(err);
+    }
+    return res.json(documents);
+  });
+});
+
+app.post('/users', function(req, res) {
+  console.log(req.body);
+  User.create(
+    {
+      email: req.body.email
+    },
+    function(err, document) {
+      if (err) {
+        return res
+          .status(500)
+          .json(err);
+      }
+
+      if (!document) {
+        return res
+          .status(404)
+          .send();
+      }
+
+      res.json(document);
+    }
+  )
+});
+
+app.put('/users/:id', function(req, res) {
+  User.findOneAndUpdate({_id: req.params.id}, { email: req.body.email }, { new: true }, function(err, document) {
+    if (err) {
+      return res
+        .status(500)
+        .json(err);
+    }
+
+    if (!document) {
+      return res
+        .status(404)
+        .send();
+    }
+
+    res.json(document);
+  })
+});
+
+app.delete('/users/:id', function(req, res) {
+  User.findOneAndRemove({_id: req.params.id}, function(err) {
+    if (err) {
+      return res
+        .status(500)
+        .json(err);
+    }
+
+    res
+      .status(204)
+      .send();
+  })
 });
 
 // Catch all
