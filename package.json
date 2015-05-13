@@ -6,8 +6,8 @@
   "scripts": {
     "test": "npm test",
     "clean": "rm -rf ./dist",
-    "copy": "cp package.json ./dist/package.json && cp app/*.js ./dist && cp -R ./app/views ./dist",
-    "setup": "mkdir -p ./dist/public/scripts && mkdir -p ./dist/public/styles && npm run copy",
+    "copy": "cp package.json ./dist/package.json && cp -R app/models/* ./dist/models && cp -R ./app/models ./dist && cp -R ./app/views ./dist",
+    "setup": "mkdir -p ./dist/public/scripts && mkdir -p ./dist/public/styles && mkdir -p ./dist/models && npm run copy",
     "watch:scripts": "watchify ./app/public/scripts/app.js -o ./dist/public/scripts/app.js",
     "watch:styles": "watch ./app/public/styles ./dist/public/styles",
     "watch": "npm run setup && npm run watch:scripts & npm run watch:styles",
